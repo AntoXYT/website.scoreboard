@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Basketball Scoreboard</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.4/xlsx.full.min.js"></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 0;
+    }
+
+    .scoreboard {
+      max-width: 600px;
+      margin: 20px auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .scoreboard h1 {
+      text-align: center;
+    }
+
+    .team {
+      margin-bottom: 20px;
+    }
+
+    .team h2 {
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    .player {
+      margin-bottom: 10px;
+    }
+
+    .player label {
+      display: inline-block;
+      width: 120px;
+    }
+
+    .player input {
+      width: 60px;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .player i {
+      margin-right: 5px;
+      color: #888;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background-color: #4caf50;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <div class="scoreboard">
+    <h1><i class="fas fa-basketball-ball"></i> Data Analyst <i class="fas fa-basketball-ball"></i></h1>
+    <div class="team" id="teamA" data-players="Sannino Vincenzo,Fiodo Massimo,Di Pierno Kristian,Capuano Lorenzo">
+      <!-- Campi per i giocatori di Team A -->
+    </div>
+    <button onclick="exportToExcel()"><i class="fas fa-file-excel"></i> Esporta su Excel</button>
+  </div>
+
+  <script>
+function addPlayer(teamId, playerName) {
+  const team = document.getElementById(teamId);
+  if (team) {
+    const playerId = team.getElementsByClassName('player').length + 1;
+    const playerHtml = `
+      <div class="player">
+        <h3>${playerName}</h3>
+        <label for="${teamId}player${playerId}Points"><i class="fas fa-trophy"></i> Punti:</label>
+        <input type="number" id="${teamId}player${playerId}Points" value="0">
+        <label for="${teamId}player${playerId}TwoPointersMade"><i class="fas fa-basketball-ball"></i>1 fatti:</label>
+        <input type="number" id="${teamId}player${playerId}TwoPointersMade" value="0">
+        <label for="${teamId}player${playerId}TwoPointersAttempted"><i class="fas fa-basketball-ball"></i>1 tentati:</label>
+        <input type="number" id="${teamId}player${playerId}TwoPointersAttempted" value="0">
+        <label for="${teamId}player${playerId}ThreePointersMade"><i class="fas fa-basketball-ball"></i>2 fatti:</label>
+        <input type="number" id="${teamId}player${playerId}ThreePointersMade" value="0">
+        <label for="${teamId}player${playerId}ThreePointersAttempted"><i class="fas fa-basketball-ball"></i>2 tentati:</label>
+        <input type="number" id="${teamId}player${playerId}ThreePointersAttempted" value="0">
+        <label for="${teamId}player${playerId}FreeThrowsMade"><i class="fas fa-basketball-ball"></i>liberi fatti:</label>
+        <input type="number" id="${teamId}player${playerId}FreeThrowsMade" value="0">
+        <label for="${teamId}player${playerId}FreeThrowsAttempted"><i class="fas fa-basketball-ball"></i>liberi tentati:</label>
+        <input type="number" id="${teamId}player${playerId}FreeThrowsAttempted" value="0">
+        <label for="${teamId}player${playerId}OffensiveRebounds"><i class="fas fa-basketball-ball"></i> Rimbalzi offensivi:</label>
+        <input type="number" id="${teamId}player${playerId}OffensiveRebounds" value="0">
+        <label for="${teamId}player${playerId}DefensiveRebounds"><i class="fas fa-basketball-ball"></i> Rimbalzi difensivi:</label>
+        <input type="number" id="${teamId}player${playerId}DefensiveRebounds" value="0">
+        <label for="${teamId}player${playerId}PersonalFouls"><i class="fas fa-exclamation-circle"></i> Falli personali:</label>
+        <input type="number" id="${teamId}player${playerId}PersonalFouls" value="0">
+      </div>
+    `;
+    team.insertAdjacentHTML('beforeend', playerHtml);
+  }
+}
+
+
+function exportToExcel() {
+  const wb = XLSX.utils.book_new();
+  const playerData = collectPlayerData('teamA');
+  const ws = XLSX.utils.json_to_sheet(playerData);
+  XLSX.utils.book_append_sheet(wb, ws, 'Team A Players');
+  XLSX.writeFile(wb, 'basketball_players.xlsx');
+}
+
+
+
+function collectPlayerData(teamId) {
+  const team = document.getElementById(teamId);
+  const players = team.getElementsByClassName('player');
+  const playerData = [];
+
+  for (let player of players) {
+    const playerId = player.getElementsByTagName('h3')[0].textContent;
+    const inputs = player.getElementsByTagName('input');
+    const playerInfo = {
+      'Player': playerId
+    };
+
+    for (let input of inputs) {
+      const inputId = input.id.replace(teamId, ''); // Rimuove il prefisso del teamId dall'ID dell'input
+      playerInfo[inputId] = input.value;
+    }
+
+    playerData.push(playerInfo);
+  }
+
+  return playerData;
+}
+
+// Aggiungi i giocatori con i loro nomi e cognomi
+addPlayer('teamA', 'Sannino Vincenzo');
+addPlayer('teamA', 'Fiodo Massimo');
+addPlayer('teamA', 'Di Pierno Kristian');
+addPlayer('teamA', 'Capuano Lorenzo');
+  </script>
+</body>
+</html>
